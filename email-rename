@@ -4,12 +4,37 @@
 # Copyright © 2012 Martin Ueding <dev@martin-ueding.de>
 
 import argparse
+import dateutil.parser
+import email
+import os.path
+import shutil
 
 __docformat__ = "restructuredtext en"
 
 def main():
     options = _parse_args()
 
+    for filename in options.args:
+        with open(filename) as f:
+            m = email.message_from_file(f)
+
+        date = dateutil.parser.parse(m["Date"])
+
+        new_name = "{year}{month}{day}-{hour}{minute}-{sender}-{subject}.eml".format(
+            year = date.year,
+            month = date.month,
+            day = date.day,
+            hour = date.hour,
+            minute = date.minute,
+            sender = m["From"],
+            subject = m["Subject"],
+        )
+
+        new_path = os.path.join(os.path.dirname(filename), new_name)
+
+        print new_path
+
+        shutil.move(filename, new_path)
 
 def _parse_args():
     """
@@ -18,8 +43,8 @@ def _parse_args():
     :return: Namespace with arguments.
     :rtype: Namespace
     """
-    parser = argparse.ArgumentParser(description="")
-    #parser.add_argument("args", metavar="N", type=str, nargs="*", help="Positional arguments.")
+    parser = argparse.ArgumentParser(description="Parses the email headers and renames the email according to date, author and subject.")
+    parser.add_argument("args", metavar="email file", type=str, nargs="+", help=".eml files that should be parsed and renamed.")
     #parser.add_argument("", dest="", type="", default=, help=)
     #parser.add_argument("--version", action="version", version="<the version>")
 
