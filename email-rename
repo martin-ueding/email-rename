@@ -32,10 +32,11 @@ def main():
 
         new_path = os.path.join(os.path.dirname(filename), new_name)
 
-        print new_path
+        if new_path != filename:
+            print new_path
 
-        if not options.dry:
-            shutil.move(filename, new_path)
+            if not options.dry:
+                shutil.move(filename, new_path)
 
 def _parse_args():
     """
