@@ -34,7 +34,8 @@ def main():
 
         print new_path
 
-        shutil.move(filename, new_path)
+        if not options.dry:
+            shutil.move(filename, new_path)
 
 def _parse_args():
     """
@@ -45,7 +46,7 @@ def _parse_args():
     """
     parser = argparse.ArgumentParser(description="Parses the email headers and renames the email according to date, author and subject.")
     parser.add_argument("args", metavar="email file", type=str, nargs="+", help=".eml files that should be parsed and renamed.")
-    #parser.add_argument("", dest="", type="", default=, help=)
+    parser.add_argument("-n", dest="dry", action="store_true", help="Perform a dry run, do not rename.")
     #parser.add_argument("--version", action="version", version="<the version>")
 
     return parser.parse_args()
