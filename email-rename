@@ -29,6 +29,7 @@ import dateutil.parser
 import email
 import os.path
 import shutil
+import re
 
 __docformat__ = "restructuredtext en"
 
@@ -36,19 +37,19 @@ def main():
     options = _parse_args()
 
     for filename in options.args:
-        with open(filename) as f:
+        with open(filename, "rb") as f:
             m = email.message_from_file(f)
 
         date = dateutil.parser.parse(m["Date"])
 
-        new_name = "{year}{month}{day}-{hour}{minute}-{sender}-{subject}.eml".format(
+        new_name = "{year:04d}{month:02d}{day:02d}-{hour:02d}{minute:02d}-{sender}-{subject}.eml".format(
             year = date.year,
             month = date.month,
             day = date.day,
             hour = date.hour,
             minute = date.minute,
-            sender = m["From"],
-            subject = m["Subject"],
+            sender = filename_safe(get_email(m["From"])) if m["From"] is not None else "None",
+            subject = filename_safe(m["Subject"]) if m["subject"] is not None else "None",
         )
 
         new_path = os.path.join(os.path.dirname(filename), new_name)
@@ -58,6 +59,27 @@ def main():
 
             if not options.dry:
                 shutil.move(filename, new_path)
+
+def get_email(sender):
+    # Try to find just an email address.
+    m = re.match(r"([^ ]+?@[^ ]+?\.[^ ]+?)", sender)
+
+    if m is not None:
+        return m.group(1)
+
+    # Try to extract an email address.
+    m = re.search(r"<([^ ]+?@[^ ]+?\.[^ ]+?)>", sender)
+    if m is not None:
+        return m.group(1)
+    else:
+        return None
+
+def filename_safe(string):
+    return ''.join([
+        letter for letter in string
+        if letter.isalnum()
+        or letter in [".", ",", "-", "@", " ", ":"]
+    ])
 
 def _parse_args():
     """
