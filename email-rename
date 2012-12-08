@@ -32,6 +32,8 @@ import re
 
 __docformat__ = "restructuredtext en"
 
+length_limit = 90
+
 def main():
     options = _parse_args()
 
@@ -41,15 +43,27 @@ def main():
 
         date = email.utils.parsedate(m["Date"])
 
-        new_name = "{year:04d}{month:02d}{day:02d}-{hour:02d}{minute:02d}-{sender}-{subject}.eml".format(
+        parts = []
+
+        parts.append("{year:04d}{month:02d}{day:02d}".format(
             year = date[0],
             month = date[1],
             day = date[2],
+        ))
+
+        parts.append("{hour:02d}{minute:02d}".format(
             hour = date[3],
             minute = date[4],
-            sender = filename_safe(get_email(m["From"])) if m["From"] is not None else "None",
-            subject = filename_safe(m["Subject"]) if m["subject"] is not None else "None",
-        )
+        ))
+
+        parts.append(filename_safe(get_email(m["From"])) if m["From"] is not None else "None")
+        subject = filename_safe(m["Subject"]) if m["subject"] is not None else "None"
+        so_far = "-".join(parts)
+        if len(so_far) + 4 + len(subject) > length_limit:
+            subject = subject[:length_limit - 4 - len(so_far)]
+        parts.append(subject)
+
+        new_name = "-".join(parts) + ".eml"
 
         new_path = os.path.join(os.path.dirname(filename), new_name)
 
