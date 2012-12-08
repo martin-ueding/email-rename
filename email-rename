@@ -25,7 +25,6 @@
 # SOFTWARE.
 
 import argparse
-import dateutil.parser
 import email
 import os.path
 import shutil
@@ -37,17 +36,17 @@ def main():
     options = _parse_args()
 
     for filename in options.args:
-        with open(filename, "rb") as f:
+        with open(filename, "r") as f:
             m = email.message_from_file(f)
 
-        date = dateutil.parser.parse(m["Date"])
+        date = email.utils.parsedate(m["Date"])
 
         new_name = "{year:04d}{month:02d}{day:02d}-{hour:02d}{minute:02d}-{sender}-{subject}.eml".format(
-            year = date.year,
-            month = date.month,
-            day = date.day,
-            hour = date.hour,
-            minute = date.minute,
+            year = date[0],
+            month = date[1],
+            day = date[2],
+            hour = date[3],
+            minute = date[4],
             sender = filename_safe(get_email(m["From"])) if m["From"] is not None else "None",
             subject = filename_safe(m["Subject"]) if m["subject"] is not None else "None",
         )
