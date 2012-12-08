@@ -26,9 +26,10 @@
 
 import argparse
 import email
+import email.header
 import os.path
-import shutil
 import re
+import shutil
 
 __docformat__ = "restructuredtext en"
 
@@ -57,11 +58,20 @@ def main():
         ))
 
         parts.append(filename_safe(get_email(m["From"])) if m["From"] is not None else "None")
-        subject = filename_safe(m["Subject"]) if m["subject"] is not None else "None"
+
+        # Parse the subject properly.
+        raw_header = email.header.decode_header(m["Subject"])
+        header = email.header.make_header(raw_header)
+        header_str = unicode(header)
+        subject = filename_safe(header_str) if m["subject"] is not None else "None"
+
+        # Trim the subject if it is too long.
         so_far = "-".join(parts)
         if len(so_far) + 4 + len(subject) > length_limit:
             subject = subject[:length_limit - 4 - len(so_far)]
-        parts.append(subject)
+
+        # Append the subject.
+        parts.append(subject.strip())
 
         new_name = "-".join(parts) + ".eml"
 
