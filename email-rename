@@ -60,18 +60,7 @@ def main():
                 shutil.move(filename, new_path)
 
 def get_email(sender):
-    # Try to find just an email address.
-    m = re.match(r"([^ ]+?@[^ ]+?\.[^ ]+?)", sender)
-
-    if m is not None:
-        return m.group(1)
-
-    # Try to extract an email address.
-    m = re.search(r"<([^ ]+?@[^ ]+?\.[^ ]+?)>", sender)
-    if m is not None:
-        return m.group(1)
-    else:
-        return None
+    return email.utils.parseaddr(sender)[1]
 
 def filename_safe(string):
     return ''.join([
