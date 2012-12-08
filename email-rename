@@ -68,7 +68,7 @@ def main():
         new_path = os.path.join(os.path.dirname(filename), new_name)
 
         if new_path != filename:
-            print new_path
+            print(new_path)
 
             if not options.dry:
                 shutil.move(filename, new_path)
