@@ -41,7 +41,7 @@ def main():
         # Parse the subject properly.
         raw_header = email.header.decode_header(m["Subject"])
         header = email.header.make_header(raw_header)
-        header_str = unicode(header)
+        header_str = str(header)
         subject = filename_safe(header_str) if m["subject"] is not None else "None"
 
         # Trim the subject if it is too long.
@@ -57,7 +57,7 @@ def main():
         new_path = os.path.join(os.path.dirname(filename), new_name)
 
         if new_path != filename:
-            print new_path
+            print(new_path)
 
             if not options.dry:
                 shutil.move(filename, new_path)
